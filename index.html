@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FARI FILE FORMATS — مرجع و مبدل فرمت فایل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f8ff;--surface:#ffffff;--surface2:#eef2ff;--text:#0b1220;--muted:#5b6478;
+  --line:#e2e8f5;--brand:#4f6ef7;--brand2:#8b5cf6;--brand3:#38bdf8;
+  --grad:linear-gradient(135deg,#4f6ef7 0%,#8b5cf6 55%,#38bdf8 100%);
+  --shadow:0 10px 30px rgba(15,23,42,.07);--shadow2:0 18px 50px rgba(79,110,247,.16);
+  --radius:20px;--radius-sm:14px;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+}
+[data-theme="dark"]{
+  --bg:#080c18;--surface:#0f172a;--surface2:#151f36;--text:#e8eefc;--muted:#94a3b8;
+  --line:#1e2b45;--shadow:0 10px 30px rgba(0,0,0,.35);--shadow2:0 18px 50px rgba(79,110,247,.22);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Vazirmatn','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
+  line-height:1.8;min-height:100vh;transition:background .3s,color .3s;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 500px at 85% -5%,rgba(139,92,246,.13),transparent 60%),
+    radial-gradient(800px 500px at 5% 10%,rgba(56,189,248,.12),transparent 60%),
+    radial-gradient(700px 600px at 50% 110%,rgba(79,110,247,.08),transparent 60%);
+}
+[data-theme="dark"] body::before{
+  background:
+    radial-gradient(900px 500px at 85% -5%,rgba(139,92,246,.18),transparent 60%),
+    radial-gradient(800px 500px at 5% 10%,rgba(56,189,248,.12),transparent 60%),
+    radial-gradient(700px 600px at 50% 110%,rgba(79,110,247,.12),transparent 60%);
+}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::selection{background:rgba(79,110,247,.25)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:20px}
+
+/* ===== HEADER ===== */
+.header{
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid var(--line);
+}
+.header-inner{max-width:1320px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:18px}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;flex-shrink:0}
+.logo-mark{
+  width:42px;height:42px;border-radius:13px;background:var(--grad);display:grid;place-items:center;
+  color:#fff;font-weight:800;font-size:16px;box-shadow:0 8px 20px rgba(79,110,247,.35);letter-spacing:-.5px;
+}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.logo-text b{font-size:15px;letter-spacing:.3px}
+.logo-text span{font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:1.5px}
+.nav{display:flex;align-items:center;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{
+  padding:9px 14px;border-radius:11px;font-size:13.5px;font-weight:500;color:var(--muted);
+  white-space:nowrap;transition:.22s;border:1px solid transparent;
+}
+.nav a:hover{color:var(--text);background:var(--surface2)}
+.nav a.active{color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent);border-color:color-mix(in srgb,var(--brand) 22%,transparent);font-weight:600}
+.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.icon-btn{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  display:grid;place-items:center;cursor:pointer;transition:.22s;font-size:16px;
+}
+.icon-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--brand)}
+.menu-toggle{display:none}
+
+/* ===== MAIN ===== */
+main{max-width:1320px;margin:0 auto;padding:0 22px 90px;min-height:70vh}
+.page{display:none;animation:fadeUp .45s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== HERO ===== */
+.hero{padding:54px 0 30px;position:relative}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;
+  background:color-mix(in srgb,var(--brand) 9%,transparent);border:1px solid color-mix(in srgb,var(--brand) 20%,transparent);
+  color:var(--brand);font-size:12.5px;font-weight:600;margin-bottom:20px;
+}
+.hero h1{font-size:clamp(30px,4.6vw,54px);font-weight:800;line-height:1.35;letter-spacing:-1px;margin-bottom:16px}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:clamp(14px,1.6vw,17px);color:var(--muted);max-width:660px;margin-bottom:30px;line-height:2}
+.search-box{
+  display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+  border-radius:17px;padding:6px 6px 6px 18px;max-width:600px;box-shadow:var(--shadow);transition:.25s;
+}
+.search-box:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 12%,transparent)}
+.search-box input{flex:1;border:none;outline:none;background:transparent;padding:11px 0;font-size:14.5px}
+.search-box button{
+  padding:11px 22px;border-radius:12px;border:none;background:var(--grad);color:#fff;font-weight:600;
+  cursor:pointer;transition:.22s;font-size:13.5px;white-space:nowrap;
+}
+.search-box button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(79,110,247,.35)}
+.hero-stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+.stat-pill{
+  display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:15px;background:var(--surface);
+  border:1px solid var(--line);box-shadow:var(--shadow);transition:.22s;
+}
+.stat-pill:hover{transform:translateY(-3px);border-color:var(--brand)}
+.stat-pill b{font-size:20px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-pill span{font-size:12px;color:var(--muted)}
+
+/* ===== SECTION ===== */
+.section{padding:34px 0}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.section-head h2{font-size:clamp(20px,2.6vw,28px);font-weight:800;letter-spacing:-.4px}
+.section-head p{font-size:13px;color:var(--muted)}
+.grid{display:grid;gap:16px}
+.cat-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.cat-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px 18px;
+  cursor:pointer;transition:.28s cubic-bezier(.2,.7,.3,1);position:relative;overflow:hidden;
+}
+.cat-card::after{content:"";position:absolute;inset:0;background:var(--grad);opacity:0;transition:.28s}
+.cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow2);border-color:transparent}
+.cat-card:hover::after{opacity:.06}
+.cat-icon{font-size:26px;margin-bottom:11px;display:block}
+.cat-card b{display:block;font-size:14px;margin-bottom:3px}
+.cat-card span{font-size:11.5px;color:var(--muted)}
+.cat-card .cat-count{
+  position:absolute;top:14px;left:14px;font-size:10.5px;padding:3px 9px;border-radius:999px;
+  background:var(--surface2);color:var(--brand);font-weight:700;
+}
+
+/* ===== FORMAT TOOLBAR ===== */
+.toolbar{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:22px;padding:14px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+}
+.toolbar .search-box{flex:1;min-width:200px;box-shadow:none;border:none;background:var(--surface2);padding:2px 2px 2px 14px}
+.toolbar select{
+  padding:10px 34px 10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);
+  cursor:pointer;outline:none;font-size:13px;appearance:none;font-weight:500;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235b6478' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 12px center;
+}
+.toolbar select:focus{border-color:var(--brand)}
+
+/* ===== FORMAT CARDS ===== */
+.format-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.fmt-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;
+  cursor:pointer;transition:.26s cubic-bezier(.2,.7,.3,1);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:9px;
+}
+.fmt-card:hover{transform:translateY(-4px);box-shadow:var(--shadow2);border-color:color-mix(in srgb,var(--brand) 35%,transparent)}
+.fmt-top{display:flex;align-items:center;gap:11px}
+.fmt-ico{
+  width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:20px;
+  background:var(--surface2);flex-shrink:0;transition:.26s;
+}
+.fmt-card:hover .fmt-ico{background:var(--grad);color:#fff;transform:scale(1.06) rotate(-4deg)}
+.fmt-name{font-size:16px;font-weight:700;letter-spacing:.2px}
+.fmt-ext{font-size:11px;color:var(--muted);font-weight:500}
+.fmt-desc{font-size:12.5px;color:var(--muted);line-height:1.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:46px}
+.fmt-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tag{font-size:10px;padding:3px 9px;border-radius:999px;background:var(--surface2);color:var(--muted);font-weight:500}
+.tag.cat{background:color-mix(in srgb,var(--brand) 10%,transparent);color:var(--brand);font-weight:700}
+
+/* ===== DETAIL PAGE ===== */
+.detail-top{display:flex;align-items:center;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+.detail-ico{width:74px;height:74px;border-radius:20px;background:var(--grad);display:grid;place-items:center;font-size:32px;color:#fff;box-shadow:var(--shadow2);flex-shrink:0}
+.detail-top h1{font-size:clamp(24px,3.4vw,36px);font-weight:800;letter-spacing:-.6px}
+.detail-top .sub{font-size:13px;color:var(--muted);margin-top:2px}
+.detail-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+.detail-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.detail-panel h3{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.detail-panel h3::before{content:"";width:4px;height:16px;border-radius:4px;background:var(--grad)}
+.detail-panel p{font-size:13.5px;color:var(--muted);line-height:2.1}
+.detail-panel + .detail-panel{margin-top:16px}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pros-cons ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.pros-cons li{font-size:12.5px;padding:9px 12px;border-radius:10px;background:var(--surface2);line-height:1.7}
+.pros-cons .pros li::before{content:"✓ ";color:var(--ok);font-weight:800}
+.pros-cons .cons li::before{content:"✕ ";color:var(--err);font-weight:800}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv-item{padding:11px 13px;border-radius:12px;background:var(--surface2)}
+.kv-item span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px}
+.kv-item b{font-size:12.5px;font-weight:600}
+.chip-row{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:6px 12px;border-radius:999px;background:var(--surface2);font-size:11.5px;font-weight:500;transition:.2s;cursor:pointer}
+.chip:hover{background:var(--grad);color:#fff}
+
+/* ===== TOOL PAGES ===== */
+.tool-hero{text-align:center;padding:44px 0 24px}
+.tool-hero h1{font-size:clamp(24px,3.6vw,38px);font-weight:800;letter-spacing:-.7px;margin-bottom:10px}
+.tool-hero p{color:var(--muted);font-size:14px;max-width:560px;margin:0 auto}
+.tool-wrap{max-width:860px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.dropzone{
+  border:2px dashed color-mix(in srgb,var(--brand) 30%,var(--line));border-radius:var(--radius);
+  padding:44px 22px;text-align:center;cursor:pointer;transition:.26s;background:color-mix(in srgb,var(--brand) 3%,transparent);
+}
+.dropzone:hover,.dropzone.dragover{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 7%,transparent);transform:scale(1.005)}
+.dropzone .dz-ico{font-size:38px;margin-bottom:10px;display:block}
+.dropzone b{display:block;font-size:14.5px;margin-bottom:4px}
+.dropzone span{font-size:12px;color:var(--muted)}
+.file-info{
+  display:none;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-sm);
+  background:var(--surface2);margin-top:16px;
+}
+.file-info.show{display:flex}
+.file-info .fi-ico{width:46px;height:46px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.file-info .fi-meta{flex:1;min-width:0}
+.file-info .fi-meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-info .fi-meta span{font-size:11px;color:var(--muted)}
+.file-info button{background:none;border:none;cursor:pointer;color:var(--err);font-size:18px;padding:4px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:20px}
+.field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.field select,.field input[type="number"]{
+  width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px;transition:.2s;
+}
+.field select:focus,.field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 10%,transparent)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:13px;
+  border:none;background:var(--grad);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;transition:.24s;
+}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 26px rgba(79,110,247,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line)}
+.btn.secondary:hover:not(:disabled){box-shadow:var(--shadow);border-color:var(--brand)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.progress-wrap{display:none;margin-top:18px}
+.progress-wrap.show{display:block}
+.progress-bar{height:9px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--grad);border-radius:999px;transition:width .25s ease}
+.progress-label{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.result-box{
+  display:none;margin-top:18px;padding:18px;border-radius:var(--radius-sm);
+  background:color-mix(in srgb,var(--ok) 7%,transparent);border:1px solid color-mix(in srgb,var(--ok) 25%,transparent);
+}
+.result-box.show{display:block}
+.result-box b{font-size:13px;display:block;margin-bottom:4px}
+.result-box span{font-size:12px;color:var(--muted)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .es-ico{font-size:44px;opacity:.35;margin-bottom:10px;display:block}
+.empty-state b{display:block;font-size:14px;color:var(--text);margin-bottom:4px}
+.empty-state span{font-size:12.5px}
+
+/* ===== META EDITOR ===== */
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.meta-grid .full{grid-column:1/-1}
+.cover-preview{
+  width:100%;aspect-ratio:1;border-radius:var(--radius-sm);background:var(--surface2);
+  display:grid;place-items:center;overflow:hidden;cursor:pointer;border:1px solid var(--line);
+  max-width:200px;margin-bottom:10px;transition:.22s;position:relative;
+}
+.cover-preview:hover{border-color:var(--brand)}
+.cover-preview img{width:100%;height:100%;object-fit:cover}
+.cover-preview .cp-empty{font-size:32px;opacity:.3}
+.cover-preview span{position:absolute;bottom:0;left:0;right:0;padding:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;text-align:center}
+
+/* ===== FILE INFO ===== */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:18px}
+.info-item{padding:15px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--line)}
+.info-item span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:3px}
+.info-item b{font-size:13px;font-weight:600;word-break:break-all}
+
+/* ===== ABOUT ===== */
+.about-hero{text-align:center;padding:60px 0 30px}
+.about-hero .logo-mark{width:80px;height:80px;border-radius:24px;font-size:28px;margin:0 auto 22px;display:grid}
+.about-hero h1{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.about-hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:15px;line-height:2}
+.about-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:40px}
+.about-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;text-align:center;transition:.26s}
+.about-card:hover{transform:translateY(-5px);box-shadow:var(--shadow2);border-color:var(--brand)}
+.about-card .ac-ico{font-size:30px;margin-bottom:12px;display:block}
+.about-card b{display:block;font-size:15px;margin-bottom:6px}
+.about-card p{font-size:12.5px;color:var(--muted);line-height:1.9}
+
+/* ===== FOOTER ===== */
+.footer{border-top:1px solid var(--line);padding:28px 22px;text-align:center;margin-top:40px}
+.footer p{font-size:12.5px;color:var(--muted)}
+.footer p b{color:var(--text);font-weight:600}
+
+/* ===== TOAST ===== */
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none}
+.toast{
+  padding:12px 20px;border-radius:13px;background:var(--surface);border:1px solid var(--line);
+  box-shadow:0 14px 40px rgba(0,0,0,.16);font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;
+  animation:toastIn .35s cubic-bezier(.2,.7,.3,1);pointer-events:auto;max-width:92vw;
+}
+.toast.ok{border-color:color-mix(in srgb,var(--ok) 40%,var(--line))}
+.toast.err{border-color:color-mix(in srgb,var(--err) 40%,var(--line))}
+.toast.warn{border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ===== LOADER ===== */
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:960px){
+  .detail-layout{grid-template-columns:1fr}
+  .pros-cons{grid-template-columns:1fr}
+}
+@media(max-width:780px){
+  .header-inner{padding:11px 16px;gap:10px}
+  .nav{
+    position:fixed;top:64px;right:0;left:0;background:var(--surface);border-bottom:1px solid var(--line);
+    flex-direction:column;align-items:stretch;padding:10px;gap:3px;display:none;box-shadow:var(--shadow);
+    max-height:calc(100vh - 64px);overflow-y:auto;
+  }
+  .nav.open{display:flex}
+  .nav a{padding:12px 16px}
+  .menu-toggle{display:grid}
+  main{padding:0 16px 70px}
+  .hero{padding:34px 0 20px}
+  .hero-stats{gap:9px}
+  .stat-pill{padding:9px 13px}
+  .stat-pill b{font-size:16px}
+  .format-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .meta-grid{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr}
+  .toolbar{padding:11px}
+  .card{padding:18px}
+  .detail-panel{padding:18px}
+}
+@media(max-width:480px){
+  .logo-text span{display:none}
+  .format-grid{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .search-box button{padding:10px 14px;font-size:12.5px}
+  .hero h1{letter-spacing:-.5px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="navigate('home')">
+      <div class="logo-mark">FARI</div>
+      <div class="logo-text"><b>FARI FILE FORMATS</b><span>FORMAT INTELLIGENCE</span></div>
+    </div>
+    <nav class="nav" id="mainNav">
+      <a href="#home" data-page="home">خانه</a>
+      <a href="#formats" data-page="formats">فرمت‌ها</a>
+      <a href="#audio" data-page="audio">مبدل صوتی</a>
+      <a href="#video" data-page="video">مبدل ویدیو</a>
+      <a href="#image" data-page="image">مبدل تصویر</a>
+      <a href="#metadata" data-page="metadata">ویرایشگر متادیتا</a>
+      <a href="#fileinfo" data-page="fileinfo">اطلاعات فایل</a>
+      <a href="#about" data-page="about">درباره</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" title="تغییر تم" aria-label="تغییر تم">🌙</button>
+      <button class="icon-btn menu-toggle" id="menuToggle" title="منو" aria-label="منو">☰</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-badge">✦ مرجع جامع فرمت‌های دیجیتال</div>
+    <h1>هر فرمت فایلی را<br><em>بشناس، مقایسه کن و تبدیل کن</em></h1>
+    <p>FARI FILE FORMATS یک پلتفرم مدرن برای کاوش، درک و تبدیل فرمت‌های دیجیتال است. تمام پردازش‌ها به‌صورت محلی در مرورگر شما انجام می‌شود و فایل‌هایتان به هیچ سروری ارسال نمی‌شوند.</p>
+    <div class="search-box">
+      <input type="text" id="homeSearch" placeholder="جست‌وجوی فرمت… مثلاً MP3 یا PNG" autocomplete="off">
+      <button onclick="goSearch()">جست‌وجو</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill"><b id="statFormats">0</b><span>فرمت ثبت‌شده</span></div>
+      <div class="stat-pill"><b id="statCats">0</b><span>دسته‌بندی</span></div>
+      <div class="stat-pill"><b>100%</b><span>پردازش محلی</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>دسته‌بندی‌ها</h2><p>برای مشاهده فرمت‌های هر دسته کلیک کنید</p></div>
+    <div class="grid cat-grid" id="homeCats"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>ابزارهای تبدیل</h2><p>تبدیل واقعی، بدون آپلود به سرور</p></div>
+    <div class="grid cat-grid">
+      <div class="cat-card" onclick="navigate('audio')"><span class="cat-icon">🎵</span><b>مبدل صوتی</b><span>MP3, WAV, FLAC, AAC, OGG, M4A</span></div>
+      <div class="cat-card" onclick="navigate('video')"><span class="cat-icon">🎬</span><b>مبدل ویدیو</b><span>MP4, WEBM, MKV, MOV, AVI</span></div>
+      <div class="cat-card" onclick="navigate('image')"><span class="cat-icon">🖼️</span><b>مبدل تصویر</b><span>PNG, JPG, WEBP, BMP</span></div>
+      <div class="cat-card" onclick="navigate('metadata')"><span class="cat-icon">🏷️</span><b>ویرایشگر متادیتا</b><span>ویرایش تگ‌های MP3</span></div>
+      <div class="cat-card" onclick="navigate('fileinfo')"><span class="cat-icon">🔍</span><b>اطلاعات فایل</b><span>مشخصات کامل فایل</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FORMATS ================= -->
+<section class="page" id="page-formats">
+  <div class="tool-hero">
+    <h1>بانک اطلاعاتی فرمت‌ها</h1>
+    <p>فرمت مورد نظر خود را جست‌وجو، فیلتر یا مرتب کنید.</p>
+  </div>
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="formatSearch" placeholder="جست‌وجو در نام، توضیح یا پسوند…" autocomplete="off">
+    </div>
+    <select id="catFilter" aria-label="فیلتر دسته‌بندی">
+      <option value="all">همه دسته‌ها</option>
+    </select>
+    <select id="sortSelect" aria-label="مرتب‌سازی">
+      <option value="name">مرتب‌سازی: نام</option>
+      <option value="cat">مرتب‌سازی: دسته</option>
+    </select>
+  </div>
+  <div class="grid format-grid" id="formatGrid"></div>
+  <div class="empty-state" id="formatEmpty" style="display:none">
+    <span class="es-ico">🔎</span><b>فرمتی پیدا نشد</b><span>عبارت جست‌وجو یا فیلتر را تغییر دهید.</span>
+  </div>
+</section>
+
+<!-- ================= FORMAT DETAIL ================= -->
+<section class="page" id="page-detail">
+  <div style="padding-top:22px">
+    <button class="btn secondary" style="padding:9px 16px;font-size:12px" onclick="navigate('formats')">→ بازگشت به فرمت‌ها</button>
+  </div>
+  <div id="detailContent"></div>
+</section>
+
+<!-- ================= AUDIO ================= -->
+<section class="page" id="page-audio">
+  <div class="tool-hero"><h1>🎵 مبدل صوتی</h1><p>تبدیل واقعی صدا با FFmpeg.wasm — فایل شما هرگز آپلود نمی‌شود.</p></div>
+  <div class="tool-wrap">
+    <div class="card">
+      <div class="dropzone" id="audioDrop">
+        <span class="dz-ico">🎧</span><b>فایل صوتی را اینجا رها کنید</b><span>یا کلیک کنید — MP3, WAV, FLAC, AAC, OGG, M4A و…</span>
+        <input type="file" id="audioInput" accept="audio/*" hidden>
+      </div>
+      <div class="file-info" id="audioFileInfo">
+        <div class="fi-ico">🎵</div>
+        <div class="fi-meta"><b id="audioFileName">—</b><span id="audioFileMeta">—</span></div>
+        <button onclick="clearAudio()" aria-label="حذف">✕</button>
+      </div>
+      <div class="controls">
+        <div class="field"><label>فرمت خروجی</label>
+          <select id="audioOut"><option>MP3</option><option>WAV</option><option>FLAC</option><option>AAC</option><option>OGG</option><option>M4A</option></select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="audioConvertBtn" disabled>شروع تبدیل</button>
+      </div>
+      <div class="progress-wrap" id="audioProgress"><div class="progress-label"><span id="audioProgressText">در حال آماده‌سازی…</span><span id="audioProgressPct">0%</span></div><div class="progress-bar"><div class="progress-fill" id="audioProgressFill"></div></div></div>
+      <div class="result-box" id="audioResult"><b>✅ تبدیل انجام شد</b><span id="audioResultMeta"></span><div class="btn-row"><button class="btn" id="audioDownloadBtn">دانلود فایل خروجی</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VIDEO ================= -->
+<section class="page" id="page-video">
+  <div class="tool-hero"><h1>🎬 مبدل ویدیو</h1><p>تبدیل واقعی ویدیو در مرورگر با FFmpeg.wasm — محدودیت حافظه مرورگر را در نظر بگیرید.</p></div>
+  <div class="tool-wrap">
+    <div class="card">
+      <div class="dropzone" id="videoDrop">
+        <span class="dz-ico">🎞️</span><b>فایل ویدیو را اینجا رها کنید</b><span>یا کلیک کنید — MP4, WEBM, MKV, MOV, AVI و…</span>
+        <input type="file" id="videoInput" accept="video/*" hidden>
+      </div>
+      <div class="file-info" id="videoFileInfo">
+        <div class="fi-ico">🎬</div>
+        <div class="fi-meta"><b id="videoFileName">—</b><span id="videoFileMeta">—</span></div>
+        <button onclick="clearVideo()" aria-label="حذف">✕</button>
+      </div>
+      <div class="controls">
+        <div class="field"><label>فرمت خروجی</label>
+          <select id="videoOut"><option>MP4</option><option>WEBM</option><option>MKV</option><option>MOV</option><option>AVI</option></select>
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn" id="videoConvertBtn" disabled>شروع تبدیل</button></div>
+      <div class="progress-wrap" id="videoProgress"><div class="progress-label"><span id="videoProgressText">در حال آماده‌سازی…</span><span id="videoProgressPct">0%</span></div><div class="progress-bar"><div class="progress-fill" id="videoProgressFill"></div></div></div>
+      <div class="result-box" id="videoResult"><b>✅ تبدیل انجام شد</b><span id="videoResultMeta"></span><div class="btn-row"><button class="btn" id="videoDownloadBtn">دانلود فایل خروجی</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= IMAGE ================= -->
+<section class="page" id="page-image">
+  <div class="tool-hero"><h1>🖼️ مبدل تصویر</h1><p>تغییر فرمت، کیفیت، ابعاد و فشرده‌سازی — کاملاً با Canvas API در مرورگر.</p></div>
+  <div class="tool-wrap">
+    <div class="card">
+      <div class="dropzone" id="imageDrop">
+        <span class="dz-ico">🖼️</span><b>تصویر را اینجا رها کنید</b><span>یا کلیک کنید — PNG, JPG, WEBP, BMP, GIF…</span>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+      </div>
+      <div class="file-info" id="imageFileInfo">
+        <div class="fi-ico">🖼️</div>
+        <div class="fi-meta"><b id="imageFileName">—</b><span id="imageFileMeta">—</span></div>
+        <button onclick="clearImage()" aria-label="حذف">✕</button>
+      </div>
+      <div id="imagePreviewWrap" style="display:none;margin-top:16px;text-align:center">
+        <img id="imagePreview" style="max-width:100%;max-height:260px;border-radius:14px;border:1px solid var(--line)" alt="پیش‌نمایش">
+      </div>
+      <div class="controls">
+        <div class="field"><label>فرمت خروجی</label><select id="imageOut"><option>PNG</option><option>JPG</option><option>WEBP</option><option>BMP</option></select></div>
+        <div class="field"><label>کیفیت (JPG/WEBP)</label><input type="number" id="imageQuality" min="0.1" max="1" step="0.05" value="0.85"></div>
+        <div class="field"><label>عرض (px) — خالی = اصلی</label><input type="number" id="imageWidth" min="1" placeholder="auto"></div>
+        <div class="field"><label>ارتفاع (px) — خالی = اصلی</label><input type="number" id="imageHeight" min="1" placeholder="auto"></div>
+      </div>
+      <div class="btn-row"><button class="btn" id="imageConvertBtn" disabled>تبدیل و فشرده‌سازی</button></div>
+      <div class="progress-wrap" id="imageProgress"><div class="progress-label"><span>در حال پردازش…</span><span>100%</span></div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+      <div class="result-box" id="imageResult"><b>✅ تصویر آماده شد</b><span id="imageResultMeta"></span><div class="btn-row"><button class="btn" id="imageDownloadBtn">دانلود تصویر</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= METADATA ================= -->
+<section class="page" id="page-metadata">
+  <div class="tool-hero"><h1>🏷️ ویرایشگر متادیتا</h1><p>ویرایش واقعی تگ‌های ID3 در فایل‌های MP3 — خواندن با music-metadata و نوشتن با browser-id3-writer.</p></div>
+  <div class="tool-wrap">
+    <div class="card">
+      <div class="dropzone" id="metaDrop">
+        <span class="dz-ico">🎵</span><b>فایل MP3 را اینجا رها کنید</b><span>یا کلیک کنید — ویرایش عنوان، هنرمند، آلبوم، کاور و…</span>
+        <input type="file" id="metaInput" accept="audio/mpeg,.mp3" hidden>
+      </div>
+      <div class="file-info" id="metaFileInfo">
+        <div class="fi-ico">🏷️</div>
+        <div class="fi-meta"><b id="metaFileName">—</b><span id="metaFileMeta">—</span></div>
+        <button onclick="clearMeta()" aria-label="حذف">✕</button>
+      </div>
+
+      <div id="metaEditor" style="display:none;margin-top:20px">
+        <div class="meta-grid">
+          <div class="full" style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+            <div>
+              <label style="font-size:11.5px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">کاور آلبوم</label>
+              <div class="cover-preview" id="coverPreview" onclick="document.getElementById('coverInput').click()">
+                <span class="cp-empty">🖼️</span>
+                <span>تغییر کاور</span>
+              </div>
+              <input type="file" id="coverInput" accept="image/*" hidden>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div class="field" style="margin-bottom:12px"><label>عنوان آهنگ (TIT2)</label><input type="text" id="metaTitle" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+              <div class="field"><label>هنرمند (TPE1)</label><input type="text" id="metaArtist" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+            </div>
+          </div>
+          <div class="field"><label>آلبوم (TALB)</label><input type="text" id="metaAlbum" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+          <div class="field"><label>سال (TYER)</label><input type="number" id="metaYear" min="1900" max="2100" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+          <div class="field"><label>شماره ترک (TRCK)</label><input type="text" id="metaTrack" placeholder="مثلاً 5/10" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+          <div class="field"><label>ژانر (TCON)</label><input type="text" id="metaGenre" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px"></div>
+          <div class="field full"><label>توضیحات (COMM)</label><textarea id="metaComment" rows="3" style="width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);outline:none;font-size:13px;resize:vertical"></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="metaSaveBtn">💾 ذخیره تگ‌ها و دانلود</button>
+        </div>
+        <div class="progress-wrap" id="metaProgress"><div class="progress-label"><span>در حال نوشتن تگ‌ها…</span><span>100%</span></div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+        <div class="result-box" id="metaResult"><b>✅ فایل با تگ‌های جدید آماده شد</b><span id="metaResultMeta"></span><div class="btn-row"><button class="btn" id="metaDownloadBtn">دانلود MP3</button></div></div>
+      </div>
+      <div class="empty-state" id="metaEmpty" style="display:none"><span class="es-ico">🏷️</span><b>فایلی انتخاب نشده</b><span>یک فایل MP3 بارگذاری کنید تا ویرایشگر فعال شود.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FILE INFO ================= -->
+<section class="page" id="page-fileinfo">
+  <div class="tool-hero"><h1>🔍 اطلاعات فایل</h1><p>مشخصات کامل هر فایل را با استفاده از File API مرورگر استخراج کنید.</p></div>
+  <div class="tool-wrap">
+    <div class="card">
+      <div class="dropzone" id="infoDrop">
+        <span class="dz-ico">📄</span><b>هر فایلی را اینجا رها کنید</b><span>یا کلیک کنید — نام، نوع، حجم، تاریخ و…</span>
+        <input type="file" id="infoInput" hidden>
+      </div>
+      <div class="file-info" id="infoFileInfo">
+        <div class="fi-ico">📄</div>
+        <div class="fi-meta"><b id="infoFileName">—</b><span id="infoFileMeta">—</span></div>
+        <button onclick="clearInfo()" aria-label="حذف">✕</button>
+      </div>
+      <div id="infoResult" style="display:none">
+        <div class="info-grid" id="infoGrid"></div>
+      </div>
+      <div class="empty-state" id="infoEmpty"><span class="es-ico">📄</span><b>فایلی انتخاب نشده</b><span>یک فایل بارگذاری کنید تا مشخصات آن نمایش داده شود.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="page" id="page-about">
+  <div class="about-hero">
+    <div class="logo-mark">FARI</div>
+    <h1>FARI FILE FORMATS</h1>
+    <p>A modern platform for exploring, understanding and converting digital file formats.</p>
+    <p style="margin-top:12px;font-size:13px">ساخته‌شده توسط <b style="color:var(--text)">FARI</b> — تمام پردازش‌ها محلی و امن هستند.</p>
+  </div>
+  <div class="about-cards">
+    <div class="about-card"><span class="ac-ico">🔒</span><b>حریم خصوصی کامل</b><p>هیچ فایلی به سرور ارسال نمی‌شود. تمام تبدیل‌ها و ویرایش‌ها در مرورگر شما انجام می‌شوند.</p></div>
+    <div class="about-card"><span class="ac-ico">⚡</span><b>تبدیل واقعی</b><p>مبدل‌های صوتی و تصویری از FFmpeg.wasm و Canvas API استفاده می‌کنند — نه شبیه‌سازی.</p></div>
+    <div class="about-card"><span class="ac-ico">📚</span><b>دانشنامه جامع</b><p>بیش از ۷۰ فرمت در ۸ دسته‌بندی با توضیحات، مزایا، معایب و نرم‌افزارهای پشتیبان.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>Website Designed &amp; Developed by <b>FARI</b> © 2026</p>
+</footer>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===== LIBRARIES ===== -->
+<script type="module">
+/* ============================================================
+   FARI FILE FORMATS — Single File Application
+   ============================================================ */
+
+/* ---------- Toast ---------- */
+function toast(msg, type='ok'){
+  const w = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.textContent = msg;
+  w.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(10px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),320); }, 3200);
+}
+
+/* ---------- Theme ---------- */
+const themeBtn = document.getElementById('themeToggle');
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('fari-theme', t);
+  themeBtn.textContent = t==='dark' ? '☀️' : '🌙';
+}
+setTheme(localStorage.getItem('fari-theme') || 'light');
+themeBtn.addEventListener('click', ()=>{
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+});
+
+/* ---------- Router ---------- */
+const pages = ['home','formats','detail','audio','video','image','metadata','fileinfo','about'];
+function navigate(page, push=true){
+  if(!pages.includes(page)) page = 'home';
+  pages.forEach(p=>document.getElementById('page-'+p).classList.remove('active'));
+  const el = document.getElementById('page-'+page);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.page===page));
+  document.getElementById('mainNav').classList.remove('open');
+  if(push) history.pushState({page}, '', '#'+page);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='formats') renderFormats();
+}
+window.addEventListener('popstate', e=>{
+  if(e.state && e.state.page) navigate(e.state.page, false);
+  else navigate(location.hash.replace('#','')||'home', false);
+});
+document.querySelectorAll('.nav a').forEach(a=>{
+  a.addEventListener('click', e=>{ e.preventDefault(); navigate(a.dataset.page); });
+});
+document.getElementById('menuToggle').addEventListener('click', ()=>{
+  document.getElementById('mainNav').classList.toggle('open');
+});
+
+/* ============================================================
+   FORMAT DATABASE
+   ============================================================ */
+const CATS = {
+  audio:{name:'صوتی', en:'Audio Formats', icon:'🎵'},
+  video:{name:'ویدیویی', en:'Video Formats', icon:'🎬'},
+  image:{name:'تصویری', en:'Image Formats', icon:'🖼️'},
+  document:{name:'سندی', en:'Document Formats', icon:'📄'},
+  archive:{name:'فشرده', en:'Archive Formats', icon:'🗜️'},
+  programming:{name:'برنامه‌نویسی', en:'Programming Formats', icon:'💻'},
+  font:{name:'فونت', en:'Font Formats', icon:'🔤'},
+  other:{name:'سایر', en:'Other Formats', icon:'📦'}
+};
+
+function F(name, cat, desc, uses, pros, cons, type, comp, apps, similar){
+  return {name, cat, desc, uses, pros, cons, type, comp, apps, similar};
+}
+
+const FORMATS = [
+  // AUDIO
+  F('MP3','audio','فرمت فشرده‌سازی صوتی با اتلاف که تعادل خوبی بین حجم و کیفیت ارائه می‌دهد و پرکاربردترین فرمت صوتی جهان است.','پخش موسیقی، پادکست، کتاب صوتی، اشتراک‌گذاری آنلاین','سازگاری بسیار بالا، حجم کم، پشتیبانی از متادیتای ID3','اتلاف جزئی کیفیت، مناسب آرشیو حرفه‌ای نیست','Lossy Audio','فشرده‌سازی با اتلاف (10:1 معمول)','Windows Media Player, VLC, iTunes, مرورگرها','AAC, OGG, WMA, OPUS'),
+  F('WAV','audio','فرمت صوتی بدون فشرده‌سازی و بدون اتلاف (PCM) که بالاترین کیفیت پخش را ارائه می‌دهد.','آرشیو استودیویی، ویرایش صدا، تولید موسیقی','کیفیت کامل، بدون اتلاف، ویرایش آسان','حجم بسیار زیاد، متادیتای محدود','Uncompressed Audio','بدون فشرده‌سازی','Audacity, Adobe Audition, VLC, Pro Tools','AIFF, FLAC, ALAC'),
+  F('FLAC','audio','فرمت صوتی بدون اتلاف با فشرده‌سازی، کیفیت کامل WAV را با حجم کمتر ارائه می‌دهد.','آرشیو موسیقی با کیفیت، پخش Hi-Fi، فروشگاه‌های موسیقی','بدون اتلاف، حجم کمتر از WAV، متن‌باز','سازگاری کمتر از MP3 در دستگاه‌های قدیمی','Lossless Audio','فشرده‌سازی بدون اتلاف (30-50%)','VLC, Foobar2000, Audacity, برخی پخش‌کننده‌های Hi-Fi','WAV, ALAC, APE'),
+  F('AAC','audio','فرمت صوتی با اتلاف پیشرفته‌تر از MP3 که در همان حجم کیفیت بهتری ارائه می‌دهد.','اپل موزیک، یوتیوب، پخش موبایل، استریم','کیفیت بهتر از MP3 در حجم برابر، پشتیبانی گسترده','متادیتای کمتر یکپارچه، برخی دستگاه‌های قدیمی','Lossy Audio','فشرده‌سازی با اتلاف','iTunes, VLC, مرورگرها, دستگاه‌های اپل','MP3, OGG, OPUS, M4A'),
+  F('OGG','audio','فرمت ظرف متن‌باز برای کدک‌های صوتی مانند Vorbis و Opus با کیفیت خوب و بدون محدودیت پتنت.','استریم، بازی‌های ویدیویی، پادکست متن‌باز','متن‌باز، کیفیت خوب، پشتیبانی از Opus','سازگاری محدودتر در دستگاه‌های اپل','Lossy Audio Container','بسته به کدک (Vorbis/Opus)','VLC, Firefox, Spotify (پشتیبان), Audacity','OPUS, MP3, AAC'),
+  F('OPUS','audio','کدک صوتی مدرن و بسیار کارآمد برای استریم و مکالمه که کیفیت بالایی در نرخ بیت پایین دارد.','تماس صوتی، دیسکورد، WebRTC، استریم','بهترین کیفیت در نرخ بیت پایین، تأخیر کم، متن‌باز','پشتیبانی مستقیم محدود در برخی پخش‌کننده‌های قدیمی','Lossy Audio','فشرده‌سازی با اتلاف بسیار کارآمد','Firefox, Chrome, VLC, Discord','OGG, AAC, MP3'),
+  F('M4A','audio','ظرف صوتی مبتنی بر MPEG-4 که معمولاً حاوی کدک AAC است و توسط اپل استفاده می‌شود.','iTunes Store، پادکست اپل، موسیقی موبایل','کیفیت خوب، حجم کم، پشتیبانی از کاور و متادیتا','سازگاری کمتر در پخش‌کننده‌های غیراپل','Audio Container','بسته به کدک داخلی','iTunes, VLC, QuickTime, مرورگرها','AAC, MP3, FLAC'),
+  F('WMA','audio','فرمت صوتی مایکروسافت با فشرده‌سازی که برای ویندوز مدیا طراحی شده است.','پخش در ویندوز، استریم قدیمی، کتاب صوتی','حجم کم، یکپارچگی با ویندوز','سازگاری محدود خارج از اکوسیستم مایکروسافت، کیفیت متوسط','Lossy Audio','فشرده‌سازی با اتلاف','Windows Media Player, VLC','MP3, AAC, WAV'),
+  F('AIFF','audio','فرمت صوتی بدون فشرده‌سازی اپل، مشابه WAV اما با ساختار اپل.','آرشیو استودیویی در مک، تولید موسیقی','کیفیت کامل، استاندارد اپل','حجم زیاد، سازگاری محدودتر','Uncompressed Audio','بدون فشرده‌سازی','QuickTime, Logic Pro, VLC, Audacity','WAV, FLAC'),
+  F('AMR','audio','فرمت صوتی فشرده بهینه‌شده برای مکالمه که در تلفن‌های قدیمی و پیام‌های صوتی استفاده می‌شد.','پیام صوتی، ضبط مکالمه، دستگاه‌های قدیمی','حجم بسیار کم، مناسب شبکه ضعیف','کیفیت پایین، کاربرد محدود','Lossy Audio','فشرده‌سازی با اتلاف شدید','VLC, برخی گوشی‌های قدیمی','MP3, AAC, OPUS'),
+  F('MIDI','audio','پروتکل/فرمت دستورات موسیقی که نت‌ها را ذخیره می‌کند، نه صدا را.','تولید موسیقی، کیبورد، DAW','حجم بسیار کم، ویرایش‌پذیر، انعطاف‌پذیر','صدای واقعی ندارد، نیاز به سینت‌سایزر','Musical Protocol','بدون فشرده‌سازی (دستورات)','FL Studio, Ableton, MuseScore, VLC','MID, KAR'),
+
+  // VIDEO
+  F('MP4','video','محبوب‌ترین فرمت ویدیویی مبتنی بر MPEG-4 که معمولاً از کدک H.264/AVC یا H.265 استفاده می‌کند.','یوتیوب، شبکه‌های اجتماعی، پخش عمومی، موبایل','سازگاری تقریباً جهانی، حجم مناسب، کیفیت خوب','نیاز به کدک برای ویرایش، پتنت','Video Container','بسته به کدک (H.264/HEVC)','VLC, QuickTime, مرورگرها, همه پخش‌کننده‌ها','MOV, MKV, WEBM'),
+  F('MKV','video','ظرف چندرسانه‌ای متن‌باز Matroska که می‌تواند چندین صدا، زیرنویس و فصل را در خود جای دهد.','آرشیو فیلم، انیمه با زیرنویس، ویدیوهای چندزبانه','انعطاف‌پذیر، متن‌باز، پشتیبانی از کدک‌های متنوع','سازگاری کمتر در دستگاه‌های ساده','Video Container','بسته به کدک داخلی','VLC, MPC-HC, PotPlayer, mpv','MP4, AVI, WEBM'),
+  F('AVI','video','فرمت قدیمی مایکروسافت برای ویدیو که ساختار ساده‌ای دارد و سازگاری گسترده‌ای در پخش‌کننده‌های قدیمی دارد.','آرشیو قدیمی، پخش در سیستم‌های قدیمی','سازگاری خوب با پخش‌کننده‌های قدیمی','حجم زیاد، فاقد قابلیت‌های مدرن','Video Container','فشرده‌سازی محدود (اغلب کم)','VLC, Windows Media Player, DivX','MP4, MKV, MOV'),
+  F('MOV','video','فرمت ویدیویی اپل مبتنی بر QuickTime که در تولید حرفه‌ای و اکوسیستم اپل رایج است.','ویرایش حرفه‌ای، دوربین‌های اپل، Final Cut Pro','کیفیت بالا، پشتیبانی از کدک‌های حرفه‌ای','حجم زیاد، سازگاری محدودتر در ویندوز','Video Container','بسته به کدک (ProRes/H.264)','QuickTime, Final Cut Pro, VLC','MP4, MKV, AVI'),
+  F('WMV','video','فرمت ویدیویی مایکروسافت برای ویندوز مدیا که زمانی برای استریم استفاده می‌شد.','استریم قدیمی ویندوز، پخش در ویندوز','حجم مناسب، یکپارچگی با ویندوز','سازگاری محدود، منسوخ‌شده','Video Container','فشرده‌سازی با اتلاف','Windows Media Player, VLC','AVI, MP4, ASF'),
+  F('FLV','video','فرمت ویدیویی فلش که برای پخش آنلاین در پلتفرم Adobe Flash استفاده می‌شد.','استریم قدیمی وب، آرشیو فلش','حجم کم، مناسب استریم قدیمی','منسوخ‌شده، ناامن','Video Container','فشرده‌سازی با اتلاف','VLC, پخش‌کننده‌های فلش قدیمی','MP4, WEBM, F4V'),
+  F('WEBM','video','فرمت ویدیویی متن‌باز مبتنی بر Matroska که برای وب طراحی شده و از VP8/VP9/AV1 پشتیبانی می‌کند.','ویدیوی وب، HTML5، یوتیوب (بخشی)','متن‌باز، بهینه برای وب، کیفیت خوب','پشتیبانی محدودتر در برخی دستگاه‌ها','Video Container','بسته به کدک (VP8/VP9/AV1)','Chrome, Firefox, VLC, مرورگرها','MP4, MKV, OGG'),
+  F('MPEG','video','استاندارد قدیمی ویدیوی دیجیتال که پایه‌گذار فرمت‌های مدرن بوده است.','دی‌وی‌دی، پخش قدیمی، آرشیو','سازگاری با پخش‌کننده‌های قدیمی','کیفیت پایین‌تر نسبت به استانداردهای جدید','Video Container','فشرده‌سازی با اتلاف','VLC, پخش‌کننده‌های DVD','MP4, AVI, MKV'),
+  F('3GP','video','فرمت ویدیویی سبک برای گوشی‌های قدیمی که حجم بسیار کمی دارد.','موبایل قدیمی، پیام چندرسانه‌ای','حجم بسیار کم، مناسب دستگاه‌های محدود','کیفیت پایین، منسوخ','Video Container','فشرده‌سازی با اتلاف شدید','VLC, گوشی‌های قدیمی','MP4, AMR, 3G2'),
+  F('M4V','video','فرمت ویدیویی اپل مشابه MP4 که معمولاً برای محتوای iTunes استفاده می‌شود و ممکن است DRM داشته باشد.','iTunes، محتوای اپل، پادکست ویدیویی','کیفیت خوب، یکپارچگی با اپل','احتمال DRM، سازگاری محدود','Video Container','بسته به کدک (H.264)','iTunes, QuickTime, VLC','MP4, MOV'),
+  F('TS','video','فرمت جریان انتقال (Transport Stream) برای پخش ویدیو و پخش تلویزیونی دیجیتال.','پخش تلویزیونی، استریم، ضبط DVR','مقاوم در برابر خطا، مناسب پخش','حجم زیاد، ویرایش دشوار','Video Stream','بدون فشرده‌سازی اضافی','VLC, پخش‌کننده‌های TV, FFmpeg','M2TS, MPEG-TS, MP4'),
+
+  // IMAGE
+  F('JPG','image','فرمت تصویری با فشرده‌سازی اتلافی که برای عکس‌های واقعی بسیار کارآمد است.','عکس دیجیتال، وب، ایمیل، چاپ','حجم کم، سازگاری جهانی','اتلاف کیفیت، بدون شفافیت','Raster Image (Lossy)','فشرده‌سازی با اتلاف قابل تنظیم','همه مرورگرها, Photoshop, GIMP','JPEG, PNG, WEBP'),
+  F('JPEG','image','نام کامل استاندارد JPG که توسط Joint Photographic Experts Group تعریف شده است.','همان JPG','همان JPG','همان JPG','Raster Image (Lossy)','فشرده‌سازی با اتلاف','همه مرورگرها, Photoshop','JPG, WEBP, AVIF'),
+  F('PNG','image','فرمت تصویری بدون اتلاف با پشتیبانی از شفافیت (آلفا) که برای گرافیک وب و اسکرین‌شات ایده‌آل است.','لوگو، آیکون، اسکرین‌شات، گرافیک با شفافیت','بدون اتلاف، شفافیت، کیفیت بالا','حجم بیشتر از JPG برای عکس','Raster Image (Lossless)','فشرده‌سازی بدون اتلاف','همه مرورگرها, Photoshop, GIMP','JPG, WEBP, SVG'),
+  F('GIF','image','فرمت تصویری قدیمی با پشتیبانی از انیمیشن و شفافیت محدود (۲۵۶ رنگ).','انیمیشن کوتاه، میم، آیکون ساده','انیمیشن، سازگاری جهانی','کیفیت رنگ پایین، حجم زیاد برای انیمیشن','Raster Animation','فشرده‌سازی بدون اتلاف (LZW)','همه مرورگرها','WEBP, APNG, MP4'),
+  F('WEBP','image','فرمت تصویری مدرن گوگل با فشرده‌سازی بهتر از JPG و پشتیبانی از شفافیت و انیمیشن.','وب مدرن، فروشگاه آنلاین، بهینه‌سازی سرعت','حجم کم، کیفیت خوب، شفافیت، انیمیشن','پشتیبانی محدودتر در نرم‌افزارهای قدیمی','Raster Image','فشرده‌سازی با/بدون اتلاف','مرورگرهای مدرن, Photoshop, GIMP','JPG, PNG, AVIF'),
+  F('SVG','image','فرمت تصویری برداری مبتنی بر XML که برای لوگو و آیکون بدون افت کیفیت در هر اندازه ایده‌آل است.','لوگو، آیکون، نمودار، گرافیک وب','بی‌نهایت مقیاس‌پذیر، حجم کم، ویرایش‌پذیر با کد','مناسب عکس واقعی نیست، پیچیدگی در گرافیک‌های سنگین','Vector Image','بدون فشرده‌سازی (متن)','همه مرورگرها, Illustrator, Inkscape','PNG, PDF, EPS'),
+  F('BMP','image','فرمت تصویری قدیمی ویندوز بدون فشرده‌سازی که کیفیت کامل پیکسل‌ها را حفظ می‌کند.','آرشیو ساده، ویندوز قدیمی','بدون اتلاف، ساده','حجم بسیار زیاد، فاقد شفافیت پیشرفته','Raster Image (Uncompressed)','بدون فشرده‌سازی','Windows Paint, Photoshop, VLC','PNG, TIFF, JPG'),
+  F('TIFF','image','فرمت تصویری حرفه‌ای با کیفیت بالا و پشتیبانی از لایه‌ها و فشرده‌سازی متنوع، مناسب چاپ.','چاپ حرفه‌ای، اسکن، آرشیو تصویر','کیفیت بسیار بالا، انعطاف‌پذیر','حجم زیاد، سازگاری محدودتر در وب','Raster Image','بدون اتلاف یا با فشرده‌سازی LZW','Photoshop, GIMP, اسکنرها','PNG, BMP, PDF'),
+  F('ICO','image','فرمت آیکون ویندوز که می‌تواند چندین اندازه و عمق رنگ را در یک فایل ذخیره کند.','آیکون ویندوز، فاوآیکون سایت','چند اندازه در یک فایل، سازگاری ویندوز','محدود به آیکون، حداکثر 256×256','Icon Image','فشرده‌سازی PNG داخلی','Photoshop, GIMP, IcoFX','PNG, SVG, ICNS'),
+  F('HEIC','image','فرمت تصویری مدرن اپل با کدک HEVC که حجم کم و کیفیت بالایی دارد.','عکس آیفون، ذخیره‌سازی بهینه','حجم کم، کیفیت بالا، پشتیبانی از Live Photo','سازگاری محدود در ویندوز و وب','Raster Image','فشرده‌سازی با اتلاف (HEVC)','iOS, macOS, برخی نسخه‌های ویندوز','JPG, AVIF, WEBP'),
+  F('AVIF','image','فرمت تصویری نسل جدید مبتنی بر AV1 با بهترین نسبت کیفیت به حجم.','وب مدرن، بهینه‌سازی تصویر','بهترین فشرده‌سازی، کیفیت بالا','پشتیبانی محدودتر در نرم‌افزارهای قدیمی','Raster Image','فشرده‌سازی با اتلاف (AV1)','مرورگرهای مدرن, Squoosh','WEBP, JPG, HEIC'),
+  F('RAW','image','فرمت خام دوربین که تمام داده‌های سنسور را بدون پردازش ذخیره می‌کند.','عکاسی حرفه‌ای، ویرایش پس‌ازعکاسی','حداکثر اطلاعات، انعطاف ویرایش بالا','حجم بسیار زیاد، نیاز به نرم‌افزار خاص','Camera Raw','بدون فشرده‌سازی/فشرده‌سازی بدون اتلاف','Lightroom, Capture One, RawTherapee','DNG, TIFF, JPG'),
+
+  // DOCUMENT
+  F('PDF','document','فرمت سند قابل حمل که ظاهر سند را در هر دستگاهی حفظ می‌کند.','اسناد رسمی، کتاب الکترونیکی، چاپ، فرم','ظاهر ثابت، امنیت، سازگاری جهانی','ویرایش دشوار، حجم نسبتاً زیاد','Portable Document','فشرده‌سازی داخلی','Adobe Acrobat, مرورگرها, Foxit','DOCX, EPUB, ODT'),
+  F('DOC','document','فرمت سند قدیمی مایکروسافت Word که هنوز در بسیاری از سیستم‌ها استفاده می‌شود.','اسناد متنی قدیمی، اداری','سازگاری با Word قدیمی','فرمت باینری، فاقد قابلیت‌های مدرن','Word Document','فشرده‌سازی محدود','Microsoft Word, LibreOffice','DOCX, ODT, RTF'),
+  F('DOCX','document','فرمت سند مدرن مایکروسافت Word مبتنی بر XML که استاندارد اداری است.','اسناد اداری، گزارش، رزومه','سازگاری گسترده، قابلیت‌های غنی','وابستگی به Word/Office','Word Document (OOXML)','فشرده‌سازی ZIP','Microsoft Word, LibreOffice, Google Docs','DOC, ODT, PDF'),
+  F('TXT','document','ساده‌ترین فرمت متنی بدون قالب‌بندی که فقط کاراکترها را ذخیره می‌کند.','یادداشت، کد ساده، لاگ','سازگاری کامل، حجم کم','بدون قالب‌بندی، بدون تصویر','Plain Text','بدون فشرده‌سازی','همه ویرایشگرها','RTF, MD, DOCX'),
+  F('RTF','document','فرمت متن غنی که قالب‌بندی ساده را در فایل متنی ذخیره می‌کند و سازگاری خوبی دارد.','اسناد متنی با قالب‌بندی ساده، تبادل بین نرم‌افزارها','سازگاری خوب، قالب‌بندی پایه','قابلیت‌های محدود نسبت به DOCX','Rich Text','فشرده‌سازی محدود','WordPad, Word, LibreOffice','DOCX, TXT, ODT'),
+  F('ODT','document','فرمت سند متن‌باز مبتنی بر OpenDocument که استاندارد LibreOffice است.','اسناد اداری متن‌باز، جایگزین Word','متن‌باز، استاندارد باز، سازگاری خوب','پشتیبانی محدودتر در مایکروسافت','OpenDocument','فشرده‌سازی ZIP','LibreOffice, OpenOffice','DOCX, DOC, RTF'),
+  F('XLS','document','فرمت صفحه‌گسترده قدیمی مایکروسافت Excel.','جدول‌های قدیمی، محاسبات ساده','سازگاری با Excel قدیمی','فرمت باینری، قابلیت محدود','Spreadsheet','فشرده‌سازی محدود','Microsoft Excel, LibreOffice','XLSX, CSV, ODS'),
+  F('XLSX','document','فرمت صفحه‌گسترده مدرن مایکروسافت Excel مبتنی بر XML.','تحلیل داده، جدول، گزارش مالی','قابلیت‌های غنی، سازگاری گسترده','وابستگی به Excel/Office','Spreadsheet (OOXML)','فشرده‌سازی ZIP','Microsoft Excel, LibreOffice, Google Sheets','XLS, CSV, ODS'),
+  F('CSV','document','فرمت متنی ساده برای داده‌های جدولی که هر سطر یک رکورد است.','تبادل داده، ایمپورت/اکسپورت، تحلیل','ساده، سبک، سازگاری کامل','بدون قالب‌بندی، بدون نوع داده','Tabular Text','بدون فشرده‌سازی','Excel, Google Sheets, همه زبان‌ها','XLSX, TSV, JSON'),
+  F('PPT','document','فرمت ارائه قدیمی مایکروسافت PowerPoint.','ارائه‌های قدیمی','سازگاری با PowerPoint قدیمی','فرمت باینری، قابلیت محدود','Presentation','فشرده‌سازی محدود','Microsoft PowerPoint','PPTX, ODP, PDF'),
+  F('PPTX','document','فرمت ارائه مدرن مایکروسافت PowerPoint مبتنی بر XML.','ارائه حرفه‌ای، اسلاید، آموزش','قابلیت‌های غنی، سازگاری گسترده','وابستگی به Office','Presentation (OOXML)','فشرده‌سازی ZIP','Microsoft PowerPoint, LibreOffice, Google Slides','PPT, ODP, PDF'),
+  F('EPUB','document','فرمت کتاب الکترونیکی باز که متن قابل تنظیم مجدد دارد و استاندارد نشر دیجیتال است.','کتاب الکترونیکی، نشر دیجیتال','متن قابل تنظیم، متن‌باز، پشتیبانی گسترده','نیاز به خواننده EPUB','Ebook','فشرده‌سازی ZIP','Calibre, Apple Books, Google Play Books','MOBI, PDF, AZW3'),
+
+  // ARCHIVE
+  F('ZIP','archive','فرمت فشرده‌سازی رایج که فایل‌ها و پوشه‌ها را در یک بسته با فشرده‌سازی بدون اتلاف ذخیره می‌کند.','ارسال فایل، پشتیبان‌گیری، بسته‌بندی','سازگاری جهانی، متن‌باز','فشرده‌سازی کمتر از 7z/RAR','Archive','فشرده‌سازی بدون اتلاف (DEFLATE)','همه سیستم‌عامل‌ها','RAR, 7Z, TAR'),
+  F('RAR','archive','فرمت فشرده‌سازی اختصاصی WinRAR با نسبت فشرده‌سازی خوب و قابلیت ترمیم.','فشرده‌سازی فایل‌های بزرگ، آرشیو','نسبت فشرده‌سازی بالا، ترمیم','اختصاصی، نرم‌افزار رایگان محدود','Archive','فشرده‌سازی بدون اتلاف (اختصاصی)','WinRAR, 7-Zip, Unarchiver','ZIP, 7Z'),
+  F('7Z','archive','فرمت فشرده‌سازی متن‌باز 7-Zip با بالاترین نسبت فشرده‌سازی در بین فرمت‌های رایج.','فشرده‌سازی حداکثری، آرشیو','بهترین نسبت فشرده‌سازی، متن‌باز','سازگاری کمتر از ZIP','Archive','فشرده‌سازی بدون اتلاف (LZMA)','7-Zip, WinRAR, PeaZip','ZIP, RAR, XZ'),
+  F('TAR','archive','فرمت آرشیو بسته‌بندی فایل‌ها بدون فشرده‌سازی که در لینوکس رایج است.','آرشیو لینوکس، بسته‌بندی قبل از فشرده‌سازی','ساده، استاندارد یونیکس','بدون فشرده‌سازی داخلی','Archive (Uncompressed)','بدون فشرده‌سازی','tar, 7-Zip, همه سیستم‌عامل‌ها','TAR.GZ, ZIP, 7Z'),
+  F('GZ','archive','فرمت فشرده‌سازی تک‌فایلی گنو که اغلب با TAR ترکیب می‌شود.','فشرده‌سازی فایل تک، لینوکس','سبک، متن‌باز','فقط تک‌فایل، بدون آرشیو','Compressed File','فشرده‌سازی بدون اتلاف (DEFLATE)','gzip, 7-Zip','ZIP, BZ2, XZ'),
+  F('BZ2','archive','فرمت فشرده‌سازی بلاک‌محور با نسبت فشرده‌سازی بهتر از GZ اما کندتر.','فشرده‌سازی فایل‌های بزرگ، لینوکس','نسبت فشرده‌سازی خوب','کندی پردازش','Compressed File','فشرده‌سازی بدون اتلاف (BWT)','bzip2, 7-Zip','GZ, XZ, ZIP'),
+  F('ISO','archive','فرمت تصویر دیسک نوری که محتوای کامل یک CD/DVD/Blu-ray را در یک فایل ذخیره می‌کند.','نصب سیستم‌عامل، بوت، آرشیو دیسک','بازتاب کامل دیسک، استاندارد','حجم زیاد','Disk Image','بدون فشرده‌سازی/فشرده‌سازی محدود','همه سیستم‌عامل‌ها, Rufus, PowerISO','IMG, BIN/CUE, DMG'),
+
+  // PROGRAMMING
+  F('HTML','programming','زبان نشانه‌گذاری استاندارد برای ساخت صفحات وب.','ساخت وب‌سایت، ایمیل HTML، مستندات','استاندارد وب، ساده، همه‌جا پشتیبانی می‌شود','زبان برنامه‌نویسی نیست، ساختار محدود','Markup Language','بدون فشرده‌سازی','همه مرورگرها, VS Code, همه ویرایشگرها','HTM, XHTML, XML'),
+  F('CSS','programming','زبان طراحی برای استایل‌دهی به صفحات HTML.','طراحی وب، انیمیشن، ریسپانسیو','کنترل کامل ظاهر، استاندارد','بدون منطق برنامه‌نویسی','Stylesheet','بدون فشرده‌سازی (قابل مینیفای)','همه مرورگرها, VS Code','SCSS, LESS, CSS'),
+  F('JS','programming','زبان برنامه‌نویسی اصلی وب که در مرورگر و سرور (Node.js) اجرا می‌شود.','تعامل وب، اپلیکیشن، سرور','همه‌جا اجرا می‌شود، اکوسیستم عظیم','تایپ ضعیف، مشکلات async','Programming Language','بدون فشرده‌سازی (قابل مینیفای)','همه مرورگرها, Node.js, VS Code','TS, JSX, WASM'),
+  F('JSON','programming','فرمت متنی سبک برای تبادل داده با ساختار کلید-مقدار.','API، تنظیمات، داده ساختاریافته','خوانا، سبک، استاندارد وب','بدون کامنت، محدود به ساختار داده','Data Format','بدون فشرده‌سازی','همه زبان‌ها, مرورگرها','YAML, XML, JSON5'),
+  F('XML','programming','زبان نشانه‌گذاری ساختاریافته برای تبادل و ذخیره داده.','SOAP، تنظیمات، اسناد ساختاریافته','ساختار سخت‌گیرانه، قابل توسعه','حجم زیاد، خوانایی کمتر از JSON','Markup Language','بدون فشرده‌سازی','همه زبان‌ها, مرورگرها','JSON, YAML, HTML'),
+  F('YAML','programming','فرمت داده خوانا برای تنظیمات و فایل‌های پیکربندی.','Docker، Kubernetes، CI/CD، تنظیمات','بسیار خوانا، کامنت‌پذیر','حساس به فاصله، پیچیدگی در ساختارهای بزرگ','Data Format','بدون فشرده‌سازی','همه زبان‌ها, ویرایشگرها','JSON, TOML, XML'),
+  F('PY','programming','زبان برنامه‌نویسی پایتون با نحو ساده و کاربرد گسترده در داده و هوش مصنوعی.','داده‌کاوی، هوش مصنوعی، اسکریپت، وب','ساده، اکوسیستم غنی','کندی اجرا نسبت به زبان‌های کامپایلری','Programming Language','بدون فشرده‌سازی','Python, VS Code, PyCharm','PYC, IPYNB, JS'),
+  F('JAVA','programming','زبان برنامه‌نویسی شی‌گرا و چندسکویی که در سازمان‌ها و اندروید استفاده می‌شود.','اندروید، سرور، سازمانی','چندسکویی، اکوسیستم بالغ','حجم بالا، پیچیدگی','Programming Language','بدون فشرده‌سازی (بایت‌کد)','JDK, IntelliJ, Eclipse','KT, CLASS, JAR'),
+  F('CPP','programming','زبان برنامه‌نویسی سطح پایین/بالا برای سیستم‌ها، بازی و عملکرد بالا.','سیستم‌عامل، بازی، نرم‌افزار عملکردی','کنترل حافظه، عملکرد بالا','پیچیدگی، مدیریت دستی حافظه','Programming Language','بدون فشرده‌سازی (کامپایل)','GCC, Clang, Visual Studio','C, RS, H'),
+  F('PHP','programming','زبان اسکریپت سمت سرور برای توسعه وب.','وب سایت، وردپرس، API','یادگیری آسان، هاست ارزان','عملکرد متوسط، مسائل امنیتی','Programming Language','بدون فشرده‌سازی','PHP, VS Code, PhpStorm','JS, PY, RB'),
+  F('SQL','programming','زبان پرس‌وجوی ساختاریافته برای مدیریت پایگاه‌های داده رابطه‌ای.','دیتابیس، تحلیل داده، گزارش','استاندارد صنعتی، قدرتمند','وابسته به DBMS، پیچیدگی','Query Language','بدون فشرده‌سازی','MySQL, PostgreSQL, SQLite','NOSQL, PL/SQL'),
+
+  // FONT
+  F('TTF','font','فرمت فونت TrueType که استاندارد رایج فونت در ویندوز و مک است.','فونت سیستم، وب، چاپ','سازگاری جهانی، کیفیت خوب','حجم بیشتر از WOFF2','Font','فشرده‌سازی محدود','همه سیستم‌عامل‌ها, همه مرورگرها','OTF, WOFF, WOFF2'),
+  F('OTF','font','فرمت فونت OpenType با قابلیت‌های تایپوگرافی پیشرفته.','فونت حرفه‌ای، چاپ، چندزبانه','قابلیت‌های پیشرفته، پشتیبانی یونیکد','حجم بیشتر، سازگاری محدودتر قدیمی','Font','فشرده‌سازی محدود','همه سیستم‌عامل‌ها, مرورگرها','TTF, WOFF2'),
+  F('WOFF','font','فرمت فونت وب نسل اول با فشرده‌سازی برای وب.','فونت وب، کاهش حجم','فشرده‌سازی خوب، پشتیبانی گسترده','نسل قدیمی نسبت به WOFF2','Web Font','فشرده‌سازی با اتلاف/بدون اتلاف','همه مرورگرها','WOFF2, TTF, OTF'),
+  F('WOFF2','font','فرمت فونت وب نسل دوم با فشرده‌سازی بهتر و حجم کمتر.','فونت وب مدرن','بهترین فشرده‌سازی، سرعت بالا','پشتیبانی محدودتر در مرورگرهای قدیمی','Web Font','فشرده‌سازی بدون اتلاف (Brotli)','مرورگرهای مدرن','WOFF, TTF, OTF'),
+
+  // OTHER
+  F('EXE','other','فایل اجرایی ویندوز که شامل کد برنامه است.','اجرای نرم‌افزار در ویندوز','اجرا مستقیم','فقط ویندوز، خطر امنیتی','Executable','فشرده‌سازی محدود','Windows','MSI, APP, DMG'),
+  F('APK','other','بسته نصب اپلیکیشن اندروید که شامل کد و منابع برنامه است.','نصب اپلیکیشن اندروید','نصب مستقیم، متن‌باز (اغلب)','فقط اندروید، خطر امنیتی','Android Package','فشرده‌سازی ZIP','Android','AAB, IPA, XAPK'),
+  F('DMG','other','تصویر دیسک اپل برای توزیع نرم‌افزار در macOS.','نصب نرم‌افزار مک','استاندارد اپل، امن','فقط macOS','Disk Image','فشرده‌سازی محدود','macOS','ISO, PKG, APP'),
+  F('DLL','other','کتابخانه پیوند پویا ویندوز که کد و منابع مشترک را در خود دارد.','کتابخانه‌های ویندوز، درایور','استفاده مجدد، بارگذاری پویا','فقط ویندوز، وابستگی','Dynamic Library','فشرده‌سازی محدود','Windows','SO, DYLIB, EXE'),
+  F('BIN','other','فایل باینری خام که می‌تواند داده اجرایی، تصویر دیسک یا firmware باشد.','firmware، تصویر دیسک، داده خام','عمومی، انعطاف‌پذیر','نامشخص بودن محتوا بدون زمینه','Binary','بدون فشرده‌سازی','بسته به نوع, همه سیستم‌عامل‌ها','ISO, IMG, DAT'),
+  F('DAT','other','فایل داده عمومی که توسط برنامه‌های مختلف برای ذخیره اطلاعات استفاده می‌شود.','داده برنامه، تنظیمات، کش','عمومی، ساده','نامشخص بودن ساختار','Data File','بسته به برنامه','بسته به برنامه','BIN, DB, LOG'),
+  F('LOG','other','فایل متنی ثبت رویدادها و پیام‌های سیستم یا برنامه.','لاگ سرور، عیب‌یابی، مانیتورینگ','خوانا، سبک، استاندارد','حجم زیاد در طول زمان، بدون ساختار استاندارد','Log File','بدون فشرده‌سازی (اغلب)','همه ویرایشگرها, سیستم‌عامل','TXT, JSON, CSV')
+];
+
+/* ---------- Home categories ---------- */
+function renderHomeCats(){
+  const el = document.getElementById('homeCats');
+  el.innerHTML = Object.entries(CATS).map(([k,c])=>{
+    const count = FORMATS.filter(f=>f.cat===k).length;
+    return `<div class="cat-card" onclick="filterByCat('${k}')">
+      <span class="cat-count">${count}</span>
+      <span class="cat-icon">${c.icon}</span>
+      <b>${c.name}</b><span>${c.en}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('statFormats').textContent = FORMATS.length;
+  document.getElementById('statCats').textContent = Object.keys(CATS).length;
+}
+
+function filterByCat(cat){
+  document.getElementById('catFilter').value = cat;
+  navigate('formats');
+  renderFormats();
+}
+window.filterByCat = filterByCat;
+
+/* ---------- Formats rendering ---------- */
+const formatSearch = document.getElementById('formatSearch');
+const catFilter = document.getElementById('catFilter');
+const sortSelect = document.getElementById('sortSelect');
+
+function initCatFilter(){
+  catFilter.innerHTML = '<option value="all">همه دسته‌ها</option>' +
+    Object.entries(CATS).map(([k,c])=>`<option value="${k}">${c.name} (${c.en})</option>`).join('');
+}
+
+function renderFormats(){
+  const q = formatSearch.value.trim().toLowerCase();
+  const cat = catFilter.value;
+  let list = FORMATS.filter(f=>{
+    if(cat!=='all' && f.cat!==cat) return false;
+    if(!q) return true;
+    return f.name.toLowerCase().includes(q) || f.desc.toLowerCase().includes(q) || f.cat.includes(q);
+  });
+  if(sortSelect.value==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else list.sort((a,b)=>a.cat.localeCompare(b.cat) || a.name.localeCompare(b.name));
+
+  const grid = document.getElementById('formatGrid');
+  const empty = document.getElementById('formatEmpty');
+  if(!list.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = list.map(f=>{
+    const c = CATS[f.cat];
+    return `<div class="fmt-card" onclick="openDetail('${f.name.replace(/'/g,"\\'")}')">
+      <div class="fmt-top"><div class="fmt-ico">${c.icon}</div>
+        <div><div class="fmt-name">${f.name}</div><div class="fmt-ext">.${f.name.toLowerCase()}</div></div>
+      </div>
+      <div class="fmt-desc">${f.desc}</div>
+      <div class="fmt-tags"><span class="tag cat">${c.name}</span><span class="tag">${f.type}</span></div>
+    </div>`;
+  }).join('');
+}
+
+let searchTimer;
+formatSearch.addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(renderFormats,160); });
+catFilter.addEventListener('change', renderFormats);
+sortSelect.addEventListener('change', renderFormats);
+
+function goSearch(){
+  const q = document.getElementById('homeSearch').value.trim();
+  document.getElementById('formatSearch').value = q;
+  document.getElementById('catFilter').value = 'all';
+  navigate('formats');
+  renderFormats();
+}
+window.goSearch = goSearch;
+document.getElementById('homeSearch').addEventListener('keydown', e=>{ if(e.key==='Enter') goSearch(); });
+
+/* ---------- Detail ---------- */
+function openDetail(name){
+  const f = FORMATS.find(x=>x.name===name);
+  if(!f) return;
+  const c = CATS[f.cat];
+  const el = document.getElementById('detailContent');
+  el.innerHTML = `
+    <div class="detail-top">
+      <div class="detail-ico">${c.icon}</div>
+      <div><h1>${f.name}</h1><div class="sub">${c.name} · ${c.en} · .${f.name.toLowerCase()}</div></div>
+    </div>
+    <div class="detail-layout">
+      <div>
+        <div class="detail-panel"><h3>توضیح کامل</h3><p>${f.desc}</p></div>
+        <div class="detail-panel"><h3>کاربردهای اصلی</h3><p>${f.uses}</p></div>
+        <div class="detail-panel"><h3>مزایا و معایب</h3>
+          <div class="pros-cons">
+            <ul class="pros">${f.pros.split('،').map(p=>`<li>${p.trim()}</li>`).join('')}</ul>
+            <ul class="cons">${f.cons.split('،').map(p=>`<li>${p.trim()}</li>`).join('')}</ul>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="detail-panel"><h3>مشخصات فنی</h3>
+          <div class="kv">
+            <div class="kv-item"><span>نوع فایل</span><b>${f.type}</b></div>
+            <div class="kv-item"><span>دسته‌بندی</span><b>${c.name}</b></div>
+            <div class="kv-item"><span>فشرده‌سازی</span><b>${f.comp}</b></div>
+            <div class="kv-item"><span>پسوند</span><b>.${f.name.toLowerCase()}</b></div>
+          </div>
+        </div>
+        <div class="detail-panel"><h3>نرم‌افزارهای پشتیبان</h3><div class="chip-row">${f.apps.split(',').map(a=>`<span class="chip">${a.trim()}</span>`).join('')}</div></div>
+        <div class="detail-panel"><h3>فرمت‌های مشابه</h3><div class="chip-row">${f.similar.split(',').map(s=>`<span class="chip" onclick="openDetail('${s.trim()}')">${s.trim()}</span>`).join('')}</div></div>
+      </div>
+    </div>`;
+  navigate('detail');
+}
+window.openDetail = openDetail;
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function fmtBytes(b){
+  if(b===0) return '0 B';
+  const k=1024, s=['B','KB','MB','GB','TB'];
+  const i=Math.floor(Math.log(b)/Math.log(k));
+  return (b/Math.pow(k,i)).toFixed(i?1:0)+' '+s[i];
+}
+function setProgress(fillId, pctId, textId, pct, text){
+  const fill = document.getElementById(fillId);
+  if(fill) fill.style.width = pct+'%';
+  const p = document.getElementById(pctId);
+  if(p) p.textContent = Math.round(pct)+'%';
+  const t = document.getElementById(textId);
+  if(t && text) t.textContent = text;
+}
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 3000);
+}
+
+/* ============================================================
+   DRAG & DROP HELPER
+   ============================================================ */
+function setupDrop(dropId, inputId, callback){
+  const drop = document.getElementById(dropId);
+  const input = document.getElementById(inputId);
+  drop.addEventListener('click', ()=>input.click());
+  input.addEventListener('change', ()=>{ if(input.files[0]) callback(input.files[0]); });
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('dragover'); }));
+  drop.addEventListener('drop', e=>{
+    const f = e.dataTransfer.files[0];
+    if(f) callback(f);
+  });
+}
+
+/* ============================================================
+   FFMPEG.WASM LAZY LOADER
+   ============================================================ */
+let ffmpegInstance = null;
+let ffmpegLoading = false;
+let ffmpegLoaded = false;
+
+async function getFFmpeg(){
+  if(ffmpegLoaded) return ffmpegInstance;
+  if(ffmpegLoading) {
+    while(!ffmpegLoaded) await new Promise(r=>setTimeout(r,200));
+    return ffmpegInstance;
+  }
+  ffmpegLoading = true;
+  try{
+    const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+    const { toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+    const ff = new FFmpeg();
+    const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
+    await ff.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+    ffmpegInstance = ff;
+    ffmpegLoaded = true;
+    return ff;
+  }catch(err){
+    ffmpegLoading = false;
+    throw new Error('بارگذاری FFmpeg.wasm ناموفق بود. اتصال اینترنت را بررسی کنید. ' + err.message);
+  }
+}
+
+/* ============================================================
+   AUDIO CONVERTER
+   ============================================================ */
+const audioState = { file:null, outBlob:null };
+const audioInput = document.getElementById('audioInput');
+const audioDrop = document.getElementById('audioDrop');
+
+setupDrop('audioDrop','audioInput', f=>{
+  audioState.file = f;
+  document.getElementById('audioFileName').textContent = f.name;
+  document.getElementById('audioFileMeta').textContent = `${fmtBytes(f.size)} · ${f.type||'نامشخص'}`;
+  document.getElementById('audioFileInfo').classList.add('show');
+  document.getElementById('audioConvertBtn').disabled = false;
+  document.getElementById('audioResult').classList.remove('show');
+});
+
+function clearAudio(){
+  audioState.file=null; audioState.outBlob=null;
+  document.getElementById('audioFileInfo').classList.remove('show');
+  document.getElementById('audioConvertBtn').disabled = true;
+  document.getElementById('audioResult').classList.remove('show');
+  document.getElementById('audioProgress').classList.remove('show');
+  audioInput.value='';
+}
+window.clearAudio = clearAudio;
+
+document.getElementById('audioConvertBtn').addEventListener('click', async ()=>{
+  const file = audioState.file;
+  if(!file) return;
+  const btn = document.getElementById('audioConvertBtn');
+  const prog = document.getElementById('audioProgress');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> در حال بارگذاری…';
+  prog.classList.add('show');
+  setProgress('audioProgressFill','audioProgressPct','audioProgressText', 5, 'بارگذاری موتور FFmpeg…');
+
+  try{
+    const ff = await getFFmpeg();
+    setProgress('audioProgressFill','audioProgressPct','audioProgressText', 15, 'آماده‌سازی فایل…');
+    const ext = file.name.split('.').pop().toLowerCase();
+    const inName = 'in.'+ext;
+    await ff.writeFile(inName, new Uint8Array(await file.arrayBuffer()));
+    const target = document.getElementById('audioOut').value.toLowerCase();
+    const outMap = {mp3:'libmp3lame', wav:'pcm_s16le', flac:'flac', aac:'aac', ogg:'libvorbis', m4a:'aac'};
+    const outName = 'out.'+target;
+    const args = ['-i', inName];
+    if(target==='mp3') args.push('-c:a','libmp3lame','-b:a','192k');
+    else if(target==='wav') args.push('-c:a','pcm_s16le');
+    else if(target==='flac') args.push('-c:a','flac');
+    else if(target==='aac') args.push('-c:a','aac','-b:a','192k');
+    else if(target==='ogg') args.push('-c:a','libvorbis','-q:a','5');
+    else if(target==='m4a') args.push('-c:a','aac','-b:a','192k');
+    args.push(outName);
+
+    ff.on('progress', ({progress})=>{
+      const pct = Math.min(95, 15 + progress*80);
+      setProgress('audioProgressFill','audioProgressPct','audioProgressText', pct, 'در حال تبدیل…');
+    });
+
+    await ff.exec(args);
+    setProgress('audioProgressFill','audioProgressPct','audioProgressText', 96, 'خواندن خروجی…');
+    const data = await ff.readFile(outName);
+    const mime = target==='mp3'?'audio/mpeg':target==='wav'?'audio/wav':target==='flac'?'audio/flac':target==='ogg'?'audio/ogg':'audio/mp4';
+    audioState.outBlob = new Blob([data.buffer], {type:mime});
+    setProgress('audioProgressFill','audioProgressPct','audioProgressText', 100, 'تکمیل شد');
+    document.getElementById('audioResult').classList.add('show');
+    document.getElementById('audioResultMeta').textContent = `${outName} · ${fmtBytes(audioState.outBlob.size)}`;
+    toast('تبدیل صوتی با موفقیت انجام شد','ok');
+    try{ await ff.deleteFile(inName); await ff.deleteFile(outName); }catch(e){}
+  }catch(err){
+    console.error(err);
+    toast('خطا در تبدیل: ' + err.message, 'err');
+    prog.classList.remove('show');
+  }finally{
+    btn.disabled = false; btn.textContent = 'شروع تبدیل';
+  }
+});
+
+document.getElementById('audioDownloadBtn').addEventListener('click', ()=>{
+  if(!audioState.outBlob) return;
+  const ext = document.getElementById('audioOut').value.toLowerCase();
+  const base = audioState.file.name.replace(/\.[^.]+$/,'');
+  downloadBlob(audioState.outBlob, `${base}.${ext}`);
+});
+
+/* ============================================================
+   VIDEO CONVERTER
+   ============================================================ */
+const videoState = { file:null, outBlob:null };
+setupDrop('videoDrop','videoInput', f=>{
+  videoState.file = f;
+  document.getElementById('videoFileName').textContent = f.name;
+  document.getElementById('videoFileMeta').textContent = `${fmtBytes(f.size)} · ${f.type||'نامشخص'}`;
+  document.getElementById('videoFileInfo').classList.add('show');
+  document.getElementById('videoConvertBtn').disabled = false;
+  document.getElementById('videoResult').classList.remove('show');
+});
+
+function clearVideo(){
+  videoState.file=null; videoState.outBlob=null;
+  document.getElementById('videoFileInfo').classList.remove('show');
+  document.getElementById('videoConvertBtn').disabled = true;
+  document.getElementById('videoResult').classList.remove('show');
+  document.getElementById('videoProgress').classList.remove('show');
+  document.getElementById('videoInput').value='';
+}
+window.clearVideo = clearVideo;
+
+document.getElementById('videoConvertBtn').addEventListener('click', async ()=>{
+  const file = videoState.file;
+  if(!file) return;
+  const btn = document.getElementById('videoConvertBtn');
+  const prog = document.getElementById('videoProgress');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> در حال بارگذاری…';
+  prog.classList.add('show');
+  setProgress('videoProgressFill','videoProgressPct','videoProgressText', 5, 'بارگذاری موتور FFmpeg…');
+  try{
+    const ff = await getFFmpeg();
+    setProgress('videoProgressFill','videoProgressPct','videoProgressText', 12, 'آماده‌سازی فایل…');
+    const ext = file.name.split('.').pop().toLowerCase();
+    const inName = 'vin.'+ext;
+    await ff.writeFile(inName, new Uint8Array(await file.arrayBuffer()));
+    const target = document.getElementById('videoOut').value.toLowerCase();
+    const outName = 'vout.'+target;
+    const args = ['-i', inName];
+    if(target==='mp4') args.push('-c:v','libx264','-preset','ultrafast','-crf','28','-c:a','aac','-b:a','128k');
+    else if(target==='webm') args.push('-c:v','libvpx','-b:v','1M','-c:a','libvorbis');
+    else if(target==='mkv') args.push('-c:v','libx264','-preset','ultrafast','-crf','28','-c:a','aac');
+    else if(target==='mov') args.push('-c:v','libx264','-preset','ultrafast','-crf','28','-c:a','aac');
+    else if(target==='avi') args.push('-c:v','mpeg4','-q:v','5','-c:a','libmp3lame');
+    args.push(outName);
+
+    ff.on('progress', ({progress})=>{
+      const pct = Math.min(94, 12 + progress*80);
+      setProgress('videoProgressFill','videoProgressPct','videoProgressText', pct, 'در حال تبدیل ویدیو…');
+    });
+
+    await ff.exec(args);
+    setProgress('videoProgressFill','videoProgressPct','videoProgressText', 96, 'خواندن خروجی…');
+    const data = await ff.readFile(outName);
+    const mimeMap = {mp4:'video/mp4',webm:'video/webm',mkv:'video/x-matroska',mov:'video/quicktime',avi:'video/x-msvideo'};
+    videoState.outBlob = new Blob([data.buffer], {type:mimeMap[target]||'video/mp4'});
+    setProgress('videoProgressFill','videoProgressPct','videoProgressText', 100, 'تکمیل شد');
+    document.getElementById('videoResult').classList.add('show');
+    document.getElementById('videoResultMeta').textContent = `${outName} · ${fmtBytes(videoState.outBlob.size)}`;
+    toast('تبدیل ویدیو با موفقیت انجام شد','ok');
+    try{ await ff.deleteFile(inName); await ff.deleteFile(outName); }catch(e){}
+  }catch(err){
+    console.error(err);
+    toast('خطا در تبدیل: ' + err.message, 'err');
+    prog.classList.remove('show');
+  }finally{
+    btn.disabled = false; btn.textContent = 'شروع تبدیل';
+  }
+});
+
+document.getElementById('videoDownloadBtn').addEventListener('click', ()=>{
+  if(!videoState.outBlob) return;
+  const ext = document.getElementById('videoOut').value.toLowerCase();
+  const base = videoState.file.name.replace(/\.[^.]+$/,'');
+  downloadBlob(videoState.outBlob, `${base}.${ext}`);
+});
+
+/* ============================================================
+   IMAGE CONVERTER
+   ============================================================ */
+const imageState = { file:null, outBlob:null, img:null };
+setupDrop('imageDrop','imageInput', f=>{
+  imageState.file = f;
+  document.getElementById('imageFileName').textContent = f.name;
+  document.getElementById('imageFileMeta').textContent = `${fmtBytes(f.size)} · ${f.type||'نامشخص'}`;
+  document.getElementById('imageFileInfo').classList.add('show');
+  document.getElementById('imageConvertBtn').disabled = false;
+  document.getElementById('imageResult').classList.remove('show');
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = ()=>{
+    imageState.img = img;
+    const p = document.getElementById('imagePreview');
+    p.src = url;
+    document.getElementById('imagePreviewWrap').style.display = 'block';
+  };
+  img.src = url;
+});
+
+function clearImage(){
+  imageState.file=null; imageState.outBlob=null; imageState.img=null;
+  document.getElementById('imageFileInfo').classList.remove('show');
+  document.getElementById('imageConvertBtn').disabled = true;
+  document.getElementById('imageResult').classList.remove('show');
+  document.getElementById('imagePreviewWrap').style.display = 'none';
+  document.getElementById('imageProgress').classList.remove('show');
+  document.getElementById('imageInput').value='';
+}
+window.clearImage = clearImage;
+
+document.getElementById('imageConvertBtn').addEventListener('click', ()=>{
+  const img = imageState.img;
+  if(!img) { toast('ابتدا یک تصویر انتخاب کنید','warn'); return; }
+  const format = document.getElementById('imageOut').value.toLowerCase();
+  const quality = Math.max(0.1, Math.min(1, parseFloat(document.getElementById('imageQuality').value)||0.85));
+  let w = parseInt(document.getElementById('imageWidth').value) || img.naturalWidth;
+  let h = parseInt(document.getElementById('imageHeight').value) || img.naturalHeight;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const mime = format==='jpg'?'image/jpeg':format==='png'?'image/png':format==='webp'?'image/webp':format==='bmp'?'image/bmp':'image/png';
+  document.getElementById('imageProgress').classList.add('show');
+  canvas.toBlob(blob=>{
+    if(!blob){ toast('تبدیل تصویر پشتیبانی نمی‌شود','err'); return; }
+    imageState.outBlob = blob;
+    document.getElementById('imageResult').classList.add('show');
+    document.getElementById('imageResultMeta').textContent = `${w}×${h} · ${fmtBytes(blob.size)} · ${format.toUpperCase()}`;
+    toast('تصویر با موفقیت تبدیل شد','ok');
+    setTimeout(()=>document.getElementById('imageProgress').classList.remove('show'), 500);
+  }, mime, quality);
+});
+
+document.getElementById('imageDownloadBtn').addEventListener('click', ()=>{
+  if(!imageState.outBlob) return;
+  const ext = document.getElementById('imageOut').value.toLowerCase();
+  const base = imageState.file.name.replace(/\.[^.]+$/,'');
+  downloadBlob(imageState.outBlob, `${base}.${ext}`);
+});
+
+/* ============================================================
+   METADATA EDITOR
+   ============================================================ */
+let metaState = { file:null, arrayBuffer:null, coverArrayBuffer:null, coverMime:null };
+let parseBlobFn = null;
+let ID3WriterClass = null;
+
+async function loadMetaLibs(){
+  if(parseBlobFn && ID3WriterClass) return;
+  try{
+    const mm = await import('https://cdn.jsdelivr.net/npm/music-metadata-browser@2.5.11/+esm');
+    parseBlobFn = mm.parseBlob;
+  }catch(e){ console.warn('music-metadata-browser load failed', e); }
+  try{
+    const id3 = await import('https://cdn.jsdelivr.net/npm/browser-id3-writer@6.4.0/+esm');
+    ID3WriterClass = id3.ID3Writer;
+  }catch(e){ console.warn('browser-id3-writer load failed', e); }
+}
+
+setupDrop('metaDrop','metaInput', async f=>{
+  if(!f.name.toLowerCase().endsWith('.mp3')){
+    toast('لطفاً یک فایل MP3 انتخاب کنید','warn'); return;
+  }
+  metaState.file = f;
+  metaState.arrayBuffer = await f.arrayBuffer();
+  metaState.coverArrayBuffer = null; metaState.coverMime = null;
+  document.getElementById('metaFileName').textContent = f.name;
+  document.getElementById('metaFileMeta').textContent = `${fmtBytes(f.size)} · ${f.type||'audio/mpeg'}`;
+  document.getElementById('metaFileInfo').classList.add('show');
+  document.getElementById('metaEditor').style.display = 'block';
+  document.getElementById('metaEmpty').style.display = 'none';
+  document.getElementById('metaResult').classList.remove('show');
+
+  // Reset fields
+  ['metaTitle','metaArtist','metaAlbum','metaYear','metaTrack','metaGenre','metaComment'].forEach(id=>document.getElementById(id).value='');
+  document.querySelector('#coverPreview img')?.remove();
+  document.querySelector('#coverPreview .cp-empty').style.display = 'block';
+
+  await loadMetaLibs();
+  if(parseBlobFn){
+    try{
+      const meta = await parseBlobFn(f);
+      const c = meta.common || {};
+      document.getElementById('metaTitle').value = c.title || '';
+      document.getElementById('metaArtist').value = (c.artists||[]).join(', ') || '';
+      document.getElementById('metaAlbum').value = c.album || '';
+      document.getElementById('metaYear').value = c.year || '';
+      document.getElementById('metaTrack').value = c.track ? `${c.track.no||''}${c.track.of?'/'+c.track.of:''}` : '';
+      document.getElementById('metaGenre').value = (c.genre||[]).join(', ') || '';
+      document.getElementById('metaComment').value = (c.comment||[]).join(' ') || '';
+      if(c.picture && c.picture.length){
+        const pic = c.picture[0];
+        const blob = new Blob([pic.data], {type:pic.format});
+        metaState.coverArrayBuffer = pic.data.buffer.slice(pic.data.byteOffset, pic.data.byteOffset+pic.data.byteLength);
+        metaState.coverMime = pic.format;
+        const url = URL.createObjectURL(blob);
+        showCover(url);
+      }
+    }catch(e){ console.warn('meta read error', e); }
+  }
+});
+
+function showCover(url){
+  const cp = document.getElementById('coverPreview');
+  const empty = cp.querySelector('.cp-empty');
+  if(empty) empty.style.display='none';
+  let img = cp.querySelector('img');
+  if(!img){ img = document.createElement('img'); cp.prepend(img); }
+  img.src = url;
+}
+
+document.getElementById('coverInput').addEventListener('change', async e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  metaState.coverArrayBuffer = await f.arrayBuffer();
+  metaState.coverMime = f.type || 'image/jpeg';
+  showCover(URL.createObjectURL(f));
+});
+
+document.getElementById('metaSaveBtn').addEventListener('click', async ()=>{
+  if(!metaState.arrayBuffer){ toast('ابتدا فایل MP3 بارگذاری کنید','warn'); return; }
+  await loadMetaLibs();
+  if(!ID3WriterClass){ toast('کتابخانه نوشتن تگ بارگذاری نشد. اتصال اینترنت را بررسی کنید.','err'); return; }
+  try{
+    document.getElementById('metaProgress').classList.add('show');
+    const writer = new ID3WriterClass(metaState.arrayBuffer);
+    const title = document.getElementById('metaTitle').value.trim();
+    const artist = document.getElementById('metaArtist').value.trim();
+    const album = document.getElementById('metaAlbum').value.trim();
+    const year = parseInt(document.getElementById('metaYear').value);
+    const track = document.getElementById('metaTrack').value.trim();
+    const genre = document.getElementById('metaGenre').value.trim();
+    const comment = document.getElementById('metaComment').value.trim();
+
+    if(title) writer.setFrame('TIT2', title);
+    if(artist) writer.setFrame('TPE1', artist.split(',').map(s=>s.trim()).filter(Boolean));
+    if(album) writer.setFrame('TALB', album);
+    if(year) writer.setFrame('TYER', year);
+    if(track) writer.setFrame('TRCK', track);
+    if(genre) writer.setFrame('TCON', genre.split(',').map(s=>s.trim()).filter(Boolean));
+    if(comment) writer.setFrame('COMM', {description:'', text:comment});
+    if(metaState.coverArrayBuffer){
+      writer.setFrame('APIC', {
+        type: 3,
+        data: metaState.coverArrayBuffer,
+        description: 'Cover',
+        mimeType: metaState.coverMime || 'image/jpeg'
+      });
+    }
+    writer.addTag();
+    const blob = writer.getBlob();
+    const base = metaState.file.name.replace(/\.[^.]+$/,'');
+    const url = URL.createObjectURL(blob);
+    const a = document.getElementById('metaDownloadBtn');
+    a.onclick = ()=>{ downloadBlob(blob, `${base}-tagged.mp3`); };
+    a.disabled = false;
+    document.getElementById('metaResult').classList.add('show');
+    document.getElementById('metaResultMeta').textContent = `${base}-tagged.mp3 · ${fmtBytes(blob.size)}`;
+    toast('تگ‌های ID3 با موفقیت نوشته شدند','ok');
+  }catch(err){
+    console.error(err);
+    toast('خطا در نوشتن تگ: '+err.message,'err');
+  }finally{
+    setTimeout(()=>document.getElementById('metaProgress').classList.remove('show'),600);
+  }
+});
+
+function clearMeta(){
+  metaState = {file:null,arrayBuffer:null,coverArrayBuffer:null,coverMime:null};
+  document.getElementById('metaFileInfo').classList.remove('show');
+  document.getElementById('metaEditor').style.display='none';
+  document.getElementById('metaEmpty').style.display='block';
+  document.getElementById('metaInput').value='';
+  document.getElementById('metaResult').classList.remove('show');
+}
+window.clearMeta = clearMeta;
+
+/* ============================================================
+   FILE INFO
+   ============================================================ */
+function getFileCategory(mime, ext){
+  if(mime.startsWith('audio/')) return 'صوتی (Audio)';
+  if(mime.startsWith('video/')) return 'ویدیویی (Video)';
+  if(mime.startsWith('image/')) return 'تصویری (Image)';
+  if(mime.startsWith('font/') || ['ttf','otf','woff','woff2'].includes(ext)) return 'فونت (Font)';
+  if(['zip','rar','7z','tar','gz','bz2','iso'].includes(ext)) return 'فشرده (Archive)';
+  if(['pdf','doc','docx','txt','rtf','odt','xls','xlsx','csv','ppt','pptx','epub'].includes(ext)) return 'سندی (Document)';
+  if(['html','css','js','json','xml','yaml','py','java','cpp','php','sql'].includes(ext)) return 'برنامه‌نویسی (Programming)';
+  return 'سایر (Other)';
+}
+
+setupDrop('infoDrop','infoInput', f=>{
+  document.getElementById('infoFileName').textContent = f.name;
+  document.getElementById('infoFileMeta').textContent = `${fmtBytes(f.size)} · ${f.type||'نامشخص'}`;
+  document.getElementById('infoFileInfo').classList.add('show');
+  document.getElementById('infoEmpty').style.display='none';
+  const ext = f.name.split('.').pop().toLowerCase();
+  const info = [
+    ['نام فایل', f.name],
+    ['پسوند', '.'+ext],
+    ['نوع MIME', f.type || 'نامشخص'],
+    ['حجم فایل', fmtBytes(f.size) + ' ('+f.size.toLocaleString()+' بایت)'],
+    ['آخرین تغییر', new Date(f.lastModified).toLocaleString('fa-IR')],
+    ['دسته‌بندی', getFileCategory(f.type||'', ext)],
+    ['قابل خواندن', 'بله'],
+  ];
+  if(f.type && f.type.startsWith('image/')){
+    const img = new Image();
+    img.onload = ()=>{ info.push(['ابعاد تصویر', img.naturalWidth+'×'+img.naturalHeight]); renderInfo(info); };
+    img.src = URL.createObjectURL(f);
+  } else if(f.type && f.type.startsWith('audio/')){
+    const a = document.createElement('audio');
+    a.onloadedmetadata = ()=>{ if(a.duration && isFinite(a.duration)) info.push(['مدت زمان', a.duration.toFixed(2)+' ثانیه']); renderInfo(info); };
+    a.onerror = ()=>renderInfo(info);
+    a.src = URL.createObjectURL(f);
+  } else if(f.type && f.type.startsWith('video/')){
+    const v = document.createElement('video');
+    v.onloadedmetadata = ()=>{ if(v.duration && isFinite(v.duration)) info.push(['مدت زمان', v.duration.toFixed(2)+' ثانیه']); if(v.videoWidth) info.push(['ابعاد ویدیو', v.videoWidth+'×'+v.videoHeight]); renderInfo(info); };
+    v.onerror = ()=>renderInfo(info);
+    v.src = URL.createObjectURL(f);
+  } else {
+    renderInfo(info);
+  }
+});
+
+function renderInfo(info){
+  const grid = document.getElementById('infoGrid');
+  grid.innerHTML = info.map(([k,v])=>`<div class="info-item"><span>${k}</span><b>${v}</b></div>`).join('');
+  document.getElementById('infoResult').style.display='block';
+}
+
+function clearInfo(){
+  document.getElementById('infoFileInfo').classList.remove('show');
+  document.getElementById('infoResult').style.display='none';
+  document.getElementById('infoEmpty').style.display='block';
+  document.getElementById('infoInput').value='';
+}
+window.clearInfo = clearInfo;
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init(){
+  initCatFilter();
+  renderHomeCats();
+  renderFormats();
+  const initial = location.hash.replace('#','') || 'home';
+  navigate(initial, false);
+  if(!history.state) history.replaceState({page:initial}, '', '#'+initial);
+}
+init();
+
+</script>
+</body>
+</html>
